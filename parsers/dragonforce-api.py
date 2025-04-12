@@ -19,7 +19,7 @@ import urllib3
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'libs')))
 from ransomwarelive import dbglog, stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender, openjson
 
-
+TOR_PROXY_SERVER=os.getenv('TOR_PROXY_SERVER')
 
 onion_url= 'http://z3wqggtxft7id3ibr7srivv5gjof5fwg76slewnzwwakjuf3nlhukdid.onion/api/guest/blog/posts?page=1'
 

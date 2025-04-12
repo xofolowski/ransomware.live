@@ -23,7 +23,7 @@ from ransomwarelive import dbglog, stdlog, errlog, extract_md5_from_filename, fi
 
 DATA_DIR = os.getenv('DATA_DIR')
 GROUPS_FILE = os.getenv('GROUPS_FILE')
-
+TOR_PROXY_SERVER=os.getenv('TOR_PROXY_SERVER')
 
 # Disable the warning about certificate verification
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

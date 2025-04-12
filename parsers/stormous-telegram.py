@@ -19,7 +19,11 @@ channel_username = '@StmXRaaS'  # The username of the Telegram channel
 GPT = os.getenv('OPENAI_API_KEY')
 
 # Initialize the Telegram client
-client = TelegramClient('session_name', api_id, api_hash)
+if api_id and api_hash:
+    client = TelegramClient('session_name', api_id, api_hash)
+else:
+    errlog("No Telegram API configuration found. Skipping parser.")
+    client = None
 
 async def main():
     await client.start()
@@ -62,5 +66,6 @@ async def main():
             appender(victim,'stormous',obfuscated_message,'',date)
 
 # Use asyncio to run the main coroutine
-with client:
-    client.loop.run_until_complete(main())
+if client:
+    with client:
+        client.loop.run_until_complete(main())
