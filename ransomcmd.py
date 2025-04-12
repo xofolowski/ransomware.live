@@ -147,22 +147,23 @@ def check_lock_file():
 if __name__ == '__main__':
     print(
     '''
-       _______________                        |*\_/*|________
-      |  ___________  |                      ||_/-\_|______  |
+       _______________                        |*\\_/*|________
+      |  ___________  |                      ||_/-\\_|______  |
       | |           | |                      | |           | |
       | |   0   0   | |                      | |   0   0   | |
       | |     -     | |                      | |     -     | |
-      | |   \___/   | |                      | |   \___/   | |
+      | |   \\___/   | |                      | |   \\___/   | |
       | |___     ___| |                      | |___________| |
-      |_____|\_/|_____|                      |_______________|
-        _|__|/ \|_|_.............💔.............._|________|_
-       / ********** \                          / ********** \ 
-     /  ************  \  Ransomware.live NG  /  ************  \ 
+      |_____|\\_/|_____|                      |_______________|
+        _|__|/ \\|_|_.............💔.............._|________|_
+       / ********** \\                          / ********** \\ 
+     /  ************  \\  Ransomware.live NG  /  ************  \\ 
     --------------------                    --------------------
     '''
     )
-
+    
     VICTIMS_FILE = os.getenv('DATA_DIR') + os.getenv('VICTIMS_FILE')
+    ransomwarelive.dbglog("Debuginfo")
     if not os.path.isfile(VICTIMS_FILE):
         # this is required to prevent things from breaking if the correct JSON structure is not yet present
         ransomwarelive.errlog(f'Victims file is empty - creating a new one: {VICTIMS_FILE}')

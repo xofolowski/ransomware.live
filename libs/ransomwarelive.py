@@ -77,6 +77,14 @@ PUSH_API_KEY= os.getenv('PUSH_API',None)
 GROUPS_FILE = DATA_DIR + GROUPS_FILE
 VICTIMS_FILE = DATA_DIR + VICTIMS_FILE
 
+LOG_LEVEL=os.getenv('LOG_LEVEL',None)
+logger = logging.getLogger(__name__)
+if LOG_LEVEL == "DEBUG":
+    logger.setLevel(logging.DEBUG)
+elif LOG_LEVEL == "INFO":
+    logger.setLevel(logging.INFO)
+else:
+    logger.setLevel(logging.ERROR)
 
 ############################
 #
@@ -87,19 +95,19 @@ VICTIMS_FILE = DATA_DIR + VICTIMS_FILE
 logging.basicConfig(
     format='%(asctime)s,%(msecs)d %(levelname)-8s %(message)s',
     datefmt='%Y-%m-%d:%H:%M:%S',
-    level=logging.INFO
+    level=logging.DEBUG
     )
 
 def stdlog(msg):
     '''standard infologging'''
-    logging.info(msg)
+    logger.info(msg)
 
 def dbglog(msg):
     '''standard debug logging'''
-    logging.info(msg)
+    logger.debug(msg)
 
 def errlog(msg,pushover=False):
-    logging.error(msg)
+    logger.error(msg)
     load_dotenv()
     if PUSH_USER_KEY != None and PUSH_API_KEY!=None and pushover == True:
         stdlog('Send push notification')
