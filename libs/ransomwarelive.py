@@ -837,10 +837,10 @@ async def scrape(force=False):
                 try: 
                     if group['name'] in CHROMIUM_PROXY_GROUPS:
                         stdlog(f"Using Chromium with TOR proxy for {group['name']}")
-                        browser = await p.chromium.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')}, args=['--ignore-certificate-errors'])
+                        browser = await p.chromium.launch(headless=True, proxy=TOR_PROXY, args=['--ignore-certificate-errors'])
                     elif ".onion" in host["slug"]:
                         stdlog(f"Using Firefox with TOR proxy for {group['name']}")
-                        browser = await p.firefox.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')}, args=['--ignore-certificate-errors'])
+                        browser = await p.firefox.launch(headless=True, proxy=TOR_PROXY, args=['--ignore-certificate-errors'])
                     else:
                         stdlog(f"Clearweb connexion for {group['name']}")
                         browser = await p.firefox.launch(args=['--ignore-certificate-errors'])
@@ -887,10 +887,10 @@ async def scrapegang(groupname,force=False):
                     try: 
                         if group['name'] in CHROMIUM_PROXY_GROUPS:
                             stdlog(f"Using Chromium with TOR proxy for {group['name']}")
-                            browser = await p.chromium.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')}, args=['--ignore-certificate-errors'])
+                            browser = await p.chromium.launch(headless=True, proxy=TOR_PROXY, args=['--ignore-certificate-errors'])
                         elif ".onion" in host["slug"]:
                             stdlog(f"Using Firefox with TOR proxy for {group['name']}")
-                            browser = await p.firefox.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')}, args=['--ignore-certificate-errors'])
+                            browser = await p.firefox.launch(headless=True, proxy=TOR_PROXY, args=['--ignore-certificate-errors'])
                         else:
                             stdlog(f"Clearweb connexion for {group['name']}")
                             browser = await p.firefox.launch(args=['--ignore-certificate-errors'])
@@ -931,10 +931,10 @@ async def screenshot(url,filename):
                 group = url 
             if group in CHROMIUM_PROXY_GROUPS:
                 stdlog(f"Using Chromium with TOR proxy for {group}")
-                browser = await p.chromium.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')}, args=['--ignore-certificate-errors'])
+                browser = await p.chromium.launch(headless=True, proxy=TOR_PROXY, args=['--ignore-certificate-errors'])
             elif ".onion" in url:
                 stdlog(f"Using Firefox with TOR proxy for {group}")
-                browser = await p.firefox.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')}, args=['--ignore-certificate-errors'])
+                browser = await p.firefox.launch(headless=True, proxy=TOR_PROXY, args=['--ignore-certificate-errors'])
             else:
                 stdlog(f"Clearweb connexion for {group}")
                 browser = await p.firefox.launch(args=['--ignore-certificate-errors'])
@@ -1022,10 +1022,10 @@ async def screenshotgangs():
                     #browser = await p.firefox.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')})
                     if group['name'] in CHROMIUM_PROXY_GROUPS:
                         stdlog(f"Using Chromium with TOR proxy for {group['name']}")
-                        browser = await p.chromium.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')}, args=['--ignore-certificate-errors'])
+                        browser = await p.chromium.launch(headless=True, proxy=TOR_PROXY, args=['--ignore-certificate-errors'])
                     elif ".onion" in host["slug"]:
                         stdlog(f"Using Firefox with TOR proxy for {group['name']}")
-                        browser = await p.firefox.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')}, args=['--ignore-certificate-errors'])
+                        browser = await p.firefox.launch(headless=True, proxy=TOR_PROXY, args=['--ignore-certificate-errors'])
                     else:
                         stdlog(f"Clearweb connexion for {group['name']}")
                         browser = await p.firefox.launch(args=['--ignore-certificate-errors'])
