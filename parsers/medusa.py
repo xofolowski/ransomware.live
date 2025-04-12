@@ -43,5 +43,5 @@ def main():
                         pass
                 file.close()
         except Exception as e:
-           stdlog('Medusa - parsing fail with error: ' + str(e))
+           errlog('Medusa - parsing fail with error: ' + str(e))
         

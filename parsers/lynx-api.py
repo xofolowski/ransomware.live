@@ -95,4 +95,4 @@ def main():
                     link = 'http://' + fqdn + '/leaks/' + str(id) 
                     appender(victim,'lynx',description,'',date_created,link)
         except Exception as e:
-           stdlog('Lynx - parsing fail with error: ' + str(e))
+           errlog('Lynx - parsing fail with error: ' + str(e))

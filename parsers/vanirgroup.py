@@ -45,15 +45,18 @@ def main():
                 dbglog("Processing file: " + html_doc)
                 content = file.read()
                 matches = re.search('projects:(.*)}}},P', content, re.IGNORECASE)
-                myjson= matches.group(1).replace("projectName:", '"projectName":')\
-                         .replace("projectDescription:", '"projectDescription":')\
-                         .replace("githubLink:", '"githubLink":')\
-                         .replace("websiteLink:", '"websiteLink":')\
-                         .replace("tags:", '"tags":')
-                data = json.loads(myjson) # type: ignore
-                for entry in data:
-                    title = entry['projectName'].strip()
-                    description = entry['projectDescription'].strip()
-                    appender(title, group_name, description )
+                if matches:
+                    myjson= matches.group(1).replace("projectName:", '"projectName":')\
+                            .replace("projectDescription:", '"projectDescription":')\
+                            .replace("githubLink:", '"githubLink":')\
+                            .replace("websiteLink:", '"websiteLink":')\
+                            .replace("tags:", '"tags":')
+                    data = json.loads(myjson) # type: ignore
+                    for entry in data:
+                        title = entry['projectName'].strip()
+                        description = entry['projectDescription'].strip()
+                        appender(title, group_name, description )
+                else:
+                    errlog(f"Malformed file: {filename}")
         except Exception as e:
-            stdlog(group_name + ' - parsing fail with error: ' + str(e) + 'in file:' + filename)
+            errlog(group_name + ' - parsing fail with error: ' + str(e) + 'in file:' + filename)

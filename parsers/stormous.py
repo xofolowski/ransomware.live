@@ -39,5 +39,5 @@ def main():
                     appender(victim,'stormous',country,website,published,'')
                 file.close()
         except:
-            stdlog('stormous: ' + 'parsing fail')
+            errlog('stormous: ' + 'parsing fail')
             pass 

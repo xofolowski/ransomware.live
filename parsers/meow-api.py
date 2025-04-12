@@ -92,4 +92,4 @@ def main():
                     link = 'http://' + fqdn + '/product/' + str(id) 
                     appender(title,'meow',description,'',date_created,link)
         except Exception as e:
-           stdlog('Medusa - parsing fail with error: ' + str(e))
+           errlog('Medusa - parsing fail with error: ' + str(e))

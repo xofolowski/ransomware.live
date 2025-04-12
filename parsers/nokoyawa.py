@@ -47,7 +47,7 @@ def main():
                         appender(title, 'nokoyawa', description.replace('\n',' '),website,published,post_url)
                     file.close()
                 except:
-                    stdlog('nokoyawa: '+ html_doc + ' is not a json file - parsing fail')
+                    errlog('nokoyawa: '+ html_doc + ' is not a json file - parsing fail')
         except:
             errlog('nokoyawa: ' + 'parsing fail')
             pass    

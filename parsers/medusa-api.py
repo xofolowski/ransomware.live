@@ -59,5 +59,5 @@ def main():
                 post_url = site_onion_url + id 
                 appender(victim,'medusa',description,'',updated_date,post_url)
     except Exception as e:
-           stdlog('Medusa - parsing fail with error: ' + str(e))
+           errlog('Medusa - parsing fail with error: ' + str(e))
     
