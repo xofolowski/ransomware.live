@@ -14,7 +14,7 @@ from datetime import datetime
 
 ## Import Ransomware.live libs 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'libs')))
-from ransomwarelive import stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
+from ransomwarelive import dbglog, stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
 
 def main():
 
@@ -41,6 +41,7 @@ def main():
             if filename.startswith(group_name+'-'):
                 html_doc='source/'+filename
                 file=open(html_doc,'r')
+                dbglog("Processing file: " + html_doc)
                 soup=BeautifulSoup(file,'html.parser')
                 ##divs_name = soup.find_all('div', {"class": "col-lg-4 col-sm-6 mb-4"})
                 for div in soup.find_all("div", class_="block relative p-8 bg-gray-800 rounded-lg transition duration-300 ease-in-out"):

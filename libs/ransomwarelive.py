@@ -96,7 +96,7 @@ def stdlog(msg):
 
 def dbglog(msg):
     '''standard debug logging'''
-    logging.debug(msg)
+    logging.info(msg)
 
 def errlog(msg,pushover=False):
     logging.error(msg)
@@ -124,7 +124,14 @@ def is_fqdn(string):
         return True
     return False        
 
-def get_country(victim,description='',website=''):
+def get_country(victim="",description='',website='',shortcode=None):
+    if shortcode:
+        country = dict(pycountry.countries.lookup(shortcode))['name']
+        if country:
+            return country
+        else:
+            return "Unknown Country"
+    
     country_names = [
         "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", 
         "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", 
@@ -507,7 +514,7 @@ def appender(post_title, group_name, description="", website="", published="", p
         if GPT and description == '':
             stdlog(f'Query GPT for "{post_title}" description')
             gpt_query = GPTQuery()
-            prompt = f'Can you provide a detailed description the company "{post_title}" in around 400 chars and without any links ?'
+            prompt = f'Can you provide a detailed description of the company "{post_title}" in around 400 chars and without any links ?'
             description = gpt_query.query(prompt,topic='activity')
         if description == None:
             description = ''
@@ -830,10 +837,10 @@ async def scrape(force=False):
                 try: 
                     if group['name'] in CHROMIUM_PROXY_GROUPS:
                         stdlog(f"Using Chromium with TOR proxy for {group['name']}")
-                        browser = await p.chromium.launch(headless=True, proxy={"server": "socks5://127.0.0.1:9050"}, args=['--ignore-certificate-errors'])
+                        browser = await p.chromium.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')}, args=['--ignore-certificate-errors'])
                     elif ".onion" in host["slug"]:
                         stdlog(f"Using Firefox with TOR proxy for {group['name']}")
-                        browser = await p.firefox.launch(headless=True, proxy={"server": "socks5://127.0.0.1:9050"}, args=['--ignore-certificate-errors'])
+                        browser = await p.firefox.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')}, args=['--ignore-certificate-errors'])
                     else:
                         stdlog(f"Clearweb connexion for {group['name']}")
                         browser = await p.firefox.launch(args=['--ignore-certificate-errors'])
@@ -858,7 +865,7 @@ async def scrape(force=False):
                             'updated': str(datetime.today())
                         })
                     updated = True
-                    errlog(f'Scrapping failled for {host["slug"]} with error : {e}')
+                    errlog(f'Scraping failed for {host["slug"]} with error : {e}')
             if updated:
                 with open(GROUPS_FILE, 'w', encoding='utf-8') as groupsfile:
                     json.dump(groups, groupsfile, ensure_ascii=False, indent=4)
@@ -880,10 +887,10 @@ async def scrapegang(groupname,force=False):
                     try: 
                         if group['name'] in CHROMIUM_PROXY_GROUPS:
                             stdlog(f"Using Chromium with TOR proxy for {group['name']}")
-                            browser = await p.chromium.launch(headless=True, proxy={"server": "socks5://127.0.0.1:9050"}, args=['--ignore-certificate-errors'])
+                            browser = await p.chromium.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')}, args=['--ignore-certificate-errors'])
                         elif ".onion" in host["slug"]:
                             stdlog(f"Using Firefox with TOR proxy for {group['name']}")
-                            browser = await p.firefox.launch(headless=True, proxy={"server": "socks5://127.0.0.1:9050"}, args=['--ignore-certificate-errors'])
+                            browser = await p.firefox.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')}, args=['--ignore-certificate-errors'])
                         else:
                             stdlog(f"Clearweb connexion for {group['name']}")
                             browser = await p.firefox.launch(args=['--ignore-certificate-errors'])
@@ -908,7 +915,7 @@ async def scrapegang(groupname,force=False):
                             'updated': str(datetime.today())
                         })
                         updated = True
-                        errlog(f'Scrapping failled for {host["slug"]} with error : {e}')
+                        errlog(f'Scraping failed for {host["slug"]} with error : {e}')
                     if updated:
                         with open(GROUPS_FILE, 'w', encoding='utf-8') as groupsfile:
                             json.dump(groups, groupsfile, ensure_ascii=False, indent=4)
@@ -924,10 +931,10 @@ async def screenshot(url,filename):
                 group = url 
             if group in CHROMIUM_PROXY_GROUPS:
                 stdlog(f"Using Chromium with TOR proxy for {group}")
-                browser = await p.chromium.launch(headless=True, proxy={"server": "socks5://127.0.0.1:9050"}, args=['--ignore-certificate-errors'])
+                browser = await p.chromium.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')}, args=['--ignore-certificate-errors'])
             elif ".onion" in url:
                 stdlog(f"Using Firefox with TOR proxy for {group}")
-                browser = await p.firefox.launch(headless=True, proxy={"server": "socks5://127.0.0.1:9050"}, args=['--ignore-certificate-errors'])
+                browser = await p.firefox.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')}, args=['--ignore-certificate-errors'])
             else:
                 stdlog(f"Clearweb connexion for {group}")
                 browser = await p.firefox.launch(args=['--ignore-certificate-errors'])
@@ -1012,13 +1019,13 @@ async def screenshotgangs():
             filename = f'{SCREENSHOT_DIR}/{filename}.png'
             async with async_playwright() as p:
                 try:
-                    #browser = await p.firefox.launch(headless=True, proxy={"server": "socks5://127.0.0.1:9050"})
+                    #browser = await p.firefox.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')})
                     if group['name'] in CHROMIUM_PROXY_GROUPS:
                         stdlog(f"Using Chromium with TOR proxy for {group['name']}")
-                        browser = await p.chromium.launch(headless=True, proxy={"server": "socks5://127.0.0.1:9050"}, args=['--ignore-certificate-errors'])
+                        browser = await p.chromium.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')}, args=['--ignore-certificate-errors'])
                     elif ".onion" in host["slug"]:
                         stdlog(f"Using Firefox with TOR proxy for {group['name']}")
-                        browser = await p.firefox.launch(headless=True, proxy={"server": "socks5://127.0.0.1:9050"}, args=['--ignore-certificate-errors'])
+                        browser = await p.firefox.launch(headless=True, proxy={"server": os.getenv('TOR_PROXY_SERVER')}, args=['--ignore-certificate-errors'])
                     else:
                         stdlog(f"Clearweb connexion for {group['name']}")
                         browser = await p.firefox.launch(args=['--ignore-certificate-errors'])

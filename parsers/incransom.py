@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 
 ## Import Ransomware.live libs 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'libs')))
-from ransomwarelive import stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
+from ransomwarelive import dbglog, stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
 
 
 def main():
@@ -24,6 +24,7 @@ def main():
              if filename.startswith(__name__.split('.')[-1]+'-'):
                 html_doc='source/'+filename
                 file=open(html_doc,'r')
+                dbglog("Processing file: " + html_doc)
                 soup=BeautifulSoup(file,'html.parser')
                 divs_name=soup.find_all('a', {"class":"flex flex-col justify-between w-full h-56 border-t-4 border-2 border-t-green-500 dark:border-gray-900 dark:border-t-green-500 rounded-[20px] bg-white dark:bg-navy-800"})
                 for div in divs_name:

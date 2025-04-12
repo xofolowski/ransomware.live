@@ -14,7 +14,7 @@ from datetime import datetime
 
 ## Import Ransomware.live libs 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'libs')))
-from ransomwarelive import stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
+from ransomwarelive import dbglog, stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
 
 import xml.etree.ElementTree as ET
 import requests
@@ -24,8 +24,8 @@ from io import StringIO
 
 # Set up Tor SOCKS proxy
 proxies = {
-    'http': 'socks5h://localhost:9050',
-    'https': 'socks5h://localhost:9050'
+    'http': TOR_PROXY_SERVER,
+    'https': TOR_PROXY_SERVER
 }
 
 # Replace this with the actual onion URL

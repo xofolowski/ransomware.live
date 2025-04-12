@@ -14,7 +14,7 @@ from datetime import datetime
 
 ## Import Ransomware.live libs 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'libs')))
-from ransomwarelive import stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
+from ransomwarelive import dbglog, stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
 
 def convert_date_time_format(date_time_str):
     # Parse the original date and time string (assuming DD/MM/YYYY HH:MM format)
@@ -33,6 +33,7 @@ def main():
             if filename.startswith('mallox-'):
                 html_doc='source/'+filename
                 file=open(html_doc,'r')
+                dbglog("Processing file: " + html_doc)
                 soup=BeautifulSoup(file,'html.parser')
                 cards = soup.find_all('div', class_='card')
                 # Loop through each card to extract the required information with improved error handling

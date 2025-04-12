@@ -15,10 +15,9 @@ from datetime import datetime
 
 ## Import Ransomware.live libs 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'libs')))
-from ransomwarelive import stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
+from ransomwarelive import dbglog, stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
 
 def main():
-    date_format = "%Y-%m-%d %H:%M:%S.%f"   
     ## Get the ransomware group name from the script name 
     script_path = os.path.abspath(__file__)
     # If it's a symbolic link find the link source 
@@ -38,18 +37,24 @@ def main():
             if filename.startswith(group_name+'-'):
                 html_doc='source/'+filename
                 file=open(html_doc,'r')
+                dbglog("Processing file: " + html_doc)
                 soup=BeautifulSoup(file,'html.parser')
                 post_divs = soup.find_all('div', class_='h-full rounded-2xl bg-stone-200/50 from-orange-900 via-amber-700 to-white p-[1px] text-sm shadow-[inset_0_0_0_1px_rgba(255,255,255,0.4)] hover:bg-gradient-to-r dark:bg-gray-900')
                 for post_div in post_divs:
                     date_str = post_div.find('div', class_='flex justify-between pb-4 text-xs').p.string
-                    date_obj = datetime.strptime(date_str, '%a, %B %d, %Y')
-                    published = date_obj.strftime('%Y-%m-%d %H:%M:%S.%f')
-                    title = post_div.find('p', class_='pb-4 text-lg font-bold').string
+                    try:
+                        date_obj = datetime.strptime(date_str, '%a, %B %d, %Y')
+                        published = date_obj.strftime('%Y-%m-%d %H:%M:%S.%f')
+                    except:
+                        errlog(f"Failed to parse date string: {date_str}")
+                        published = "1970-01-01 00:00:00.000"
+                    title = post_div.find('p', class_='pb-4 text-lg font-bold').string or "Unknown"
                     description = post_div.find('p', class_='line-clamp-6 pt-4').string
                     link = post_div.find_parent('a')['href']
                     url = find_slug_by_md5(group_name, extract_md5_from_filename(html_doc))
-                    url = url + link.replace('/posts/posts/','/posts/')
+                    ## This could be done better by concatenating slug.baseURL and link if link is an absolute one (starts with /):
+                    url = (url + link).replace('/posts/posts/','/posts/') # link is an absolute one, starting with /posts. However, slug url already contains /posts.
                     if title != "00":
-                        appender(title.replace('|','-'), group_name, description, '',published,url )
+                            appender(title.replace('|','-'), group_name, description, '',published,url )
         except Exception as e:
-            errlog(group_name + ' - parsing fail with error: ' + str(e) + 'in file:' + filename)
+            errlog(group_name + ' - parsing fail with error: ' + str(e) + 'in file:' + filename + " | Title: " + title + " | URL: " + url)

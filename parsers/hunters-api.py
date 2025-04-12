@@ -17,7 +17,7 @@ import socks
 import json
 ## Import Ransomware.live libs 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'libs')))
-from ransomwarelive import stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
+from ransomwarelive import dbglog, stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender, get_country
 
 
 
@@ -28,33 +28,33 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Assuming Tor is running on default port 9050.
 proxies = {
-    'http': 'socks5h://localhost:9050',
-    'https': 'socks5h://localhost:9050'
+    'http': TOR_PROXY_SERVER,
+    'https': TOR_PROXY_SERVER
 }
 
-def get_country(id):
-# Define the base URL of the API and the endpoint
-    base_url = "https://api.ransomware.live"  # Replace with the actual API base URL
-    endpoint = f"/country/{id}"  # Replace with the actual endpoint
+# def get_country(id):
+# # Define the base URL of the API and the endpoint
+#     base_url = "https://api.ransomware.live"  # Replace with the actual API base URL
+#     endpoint = f"/country/{id}"  # Replace with the actual endpoint
 
-    # Send a GET request to the API endpoint
-    response = requests.get(f"{base_url}{endpoint}")
+#     # Send a GET request to the API endpoint
+#     response = requests.get(f"{base_url}{endpoint}")
 
-    # Check the response status code
-    if response.status_code == 200:
-        # The request was successful, and we can extract the country name from the JSON response
-        data = response.json()
-        country_name = data.get("title")
-        return country_name
-    elif response.status_code == 404:
-        # The API returned a 404 error, which means the country was not found
-        return "N/A"
-    elif response.status_code == 500:
-        # The API returned a 500 error, which means the country was not found
-        return "N/A"
-    else:
-        # Handle other HTTP status codes as needed
-        return "Internal Error"
+#     # Check the response status code
+#     if response.status_code == 200:
+#         # The request was successful, and we can extract the country name from the JSON response
+#         data = response.json()
+#         country_name = data.get("title")
+#         return country_name
+#     elif response.status_code == 404:
+#         # The API returned a 404 error, which means the country was not found
+#         return "N/A"
+#     elif response.status_code == 500:
+#         # The API returned a 500 error, which means the country was not found
+#         return "N/A"
+#     else:
+#         # Handle other HTTP status codes as needed
+#         return "Internal Error"
 
 def existingpost(post_title, group_name):
     '''
@@ -98,22 +98,20 @@ def main():
     #stdlog(onion_url+" Fetched")
     if json_data is not None:
         for item in json_data:
-          #try:
+          try:
             id = item['id']
             title = item['title'].strip()
-            country = get_country(item['country'])
-            website = item.get('website','')
+            country = get_country(shortcode=item['country'])
+            website = item.get('website','') or ""
             exfiltration = item['exfiltrated_data']
             encryption = item['encrypted_data']
             published = item.get('updated_at','')
             description = "Country : " +  country + " - Exfiltraded data : " + convert_text(exfiltration) +  " - Encrypted data : " + convert_text(encryption)
             post_url = "https://hunters55rdxciehoqzwv7vgyv6nt37tbwax2reroyzxhou7my5ejyid.onion/companies/" + id 
-            if not website:
-                website=''
            
             """
                 def appender(post_title, group_name, description="", website="", published="", post_url=""):
             """
             appender(title, 'hunters', description,website, convert_date(published),post_url)
-          #except:
-          #    stdlog('Hunters API error : ' + title)
+          except:
+            stdlog('Hunters API error : ' + title)

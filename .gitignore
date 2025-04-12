@@ -181,3 +181,4 @@ dev/
 !doc/CHANGELOG.md
 etc/getASNforAPI copy.py
 etc/getASNforAPI.py
+.python-version

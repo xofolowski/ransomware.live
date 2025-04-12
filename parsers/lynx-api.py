@@ -20,7 +20,7 @@ load_dotenv(dotenv_path=env_path)
 
 ## Import Ransomware.live libs 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'libs')))
-from ransomwarelive import stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
+from ransomwarelive import dbglog, stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
 
 DATA_DIR = os.getenv('DATA_DIR')
 GROUPS_FILE = os.getenv('GROUPS_FILE')
@@ -31,8 +31,8 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Assuming Tor is running on default port 9050.
 proxies = {
-    'http': 'socks5h://localhost:9050',
-    'https': 'socks5h://localhost:9050'
+    'http': TOR_PROXY_SERVER,
+    'https': TOR_PROXY_SERVER
 }
 def get_fqdns_from_json(filename, group_name):
     # Load the JSON data from the file

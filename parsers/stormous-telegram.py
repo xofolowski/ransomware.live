@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '/var/www/ransomware-ng/libs')))
 from gpt_query import GPTQuery
-from ransomwarelive import stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
+from ransomwarelive import dbglog, stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
 
 
 # Load environment variables from .env file in the same directory

@@ -15,7 +15,7 @@ import json
 
 ## Import Ransomware.live libs 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'libs')))
-from ransomwarelive import stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
+from ransomwarelive import dbglog, stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
 
 def main():
 
@@ -42,6 +42,7 @@ def main():
             if filename.startswith(group_name+'-'):
                 html_doc='source/'+filename
                 file=open(html_doc,'r')
+                dbglog("Processing file: " + html_doc)
                 content = file.read()
                 matches = re.search('projects:(.*)}}},P', content, re.IGNORECASE)
                 myjson= matches.group(1).replace("projectName:", '"projectName":')\

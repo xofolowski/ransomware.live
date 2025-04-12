@@ -29,6 +29,7 @@ Version:
 
 import sys
 import os
+import json
 import asyncio
 import argparse
 from dotenv import load_dotenv 
@@ -161,7 +162,15 @@ if __name__ == '__main__':
     '''
     )
 
-
+    VICTIMS_FILE = os.getenv('DATA_DIR') + os.getenv('VICTIMS_FILE')
+    if not os.path.isfile(VICTIMS_FILE):
+        # this is required to prevent things from breaking if the correct JSON structure is not yet present
+        ransomwarelive.errlog(f'Victims file is empty - creating a new one: {VICTIMS_FILE}')
+        newpost = []
+        newpost.append(ransomwarelive.posttemplate("", "", str(datetime.today()),"","",str(datetime.today()),"","",""))
+        with open(VICTIMS_FILE, 'w', encoding='utf-8') as jsonfile:
+            json.dump(newpost,jsonfile)
+    
     # Create the top-level parser
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='command')
@@ -275,7 +284,7 @@ if __name__ == '__main__':
                 module.main()
             end_time = time.time()
             execution_time = end_time - start_time
-            ransomwarelive.stdlog(f'Parsing execution time {execution_time:.2f} secondes')
+            ransomwarelive.stdlog(f'Parsing execution time {execution_time:.2f} seconds')
             remove_lock_file(LOCK_FILE_PATH)
     
     elif args.command == 'generate':

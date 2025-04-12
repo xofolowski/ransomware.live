@@ -14,7 +14,7 @@ from datetime import datetime
 
 ## Import Ransomware.live libs 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'libs')))
-from ransomwarelive import stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
+from ransomwarelive import dbglog, stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
 from urllib.parse import unquote
 
 
@@ -24,6 +24,7 @@ def main():
             if filename.startswith('nokoyawa-'):
                 html_doc='source/'+filename
                 file=open(html_doc, 'r')
+                dbglog("Processing file: " + html_doc)
                 #stdlog('-->' + html_doc)
                 soup=BeautifulSoup(file,'html.parser')
                 try:

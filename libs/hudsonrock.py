@@ -40,6 +40,9 @@ def query_hudsonrock(domain_name):
 
     api_id = os.getenv('T_API_ID')
     api_hash = os.getenv('T_API_HASH')
+    if not (api_id and api_hash):
+        stdlog("No telethon API credentials provided. Skipping HudsonRock query.")
+        return None
     phone_number = os.getenv('T_PHONE_NUMBER')
     json_file_path = os.getenv('DATA_DIR') + 'hudsonrock.json'
     timer = 120

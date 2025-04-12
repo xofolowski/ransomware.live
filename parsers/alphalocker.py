@@ -15,7 +15,7 @@ from datetime import datetime
 
 ## Import Ransomware.live libs 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'libs')))
-from ransomwarelive import stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender, clean_slug
+from ransomwarelive import dbglog, stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender, clean_slug
 
 
 def main():
@@ -24,6 +24,7 @@ def main():
             if filename.startswith('alphalocker-'):
                 html_doc='source/'+filename
                 file=open(html_doc,'r')
+                dbglog("Processing file: " + html_doc)
                 soup=BeautifulSoup(file,'html.parser')
                 divs_name=soup.find_all('div', class_='b_block')
                 for div in divs_name:
