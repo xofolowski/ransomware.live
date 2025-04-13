@@ -163,7 +163,7 @@ if __name__ == '__main__':
     )
     
     VICTIMS_FILE = os.getenv('DATA_DIR') + os.getenv('VICTIMS_FILE')
-    ransomwarelive.dbglog("Debuginfo")
+    
     if not os.path.isfile(VICTIMS_FILE):
         # this is required to prevent things from breaking if the correct JSON structure is not yet present
         ransomwarelive.errlog(f'Victims file is empty - creating a new one: {VICTIMS_FILE}')
@@ -196,6 +196,11 @@ if __name__ == '__main__':
 
     parser_search = subparsers.add_parser('search', help='Search victim in database (use -h/--help for available options)')
     parser_search.add_argument('-v', '--victim', type=str, help='Specify a victim name or domain')
+
+    parser_recentvictims = subparsers.add_parser('recentvictims', help='Search most recent victims in database (use -h/--help for available options)')
+    parser_recentvictims.add_argument('-g', '--group', type=str, default="all", help='Specify a group name')
+    parser_recentvictims.add_argument('-c', '--count', type=int, default=10, help='Number of victims to return')
+    parser_recentvictims.add_argument('-s', '--since', type=str, default="1970-01-01 00:00:00", help="Only include entries discovered after this timestamp (format: YYYY-MM-DD HH:MM:SS)")
     
     parser_rss = subparsers.add_parser('rss', help='Generate RSS feeds')
 
@@ -438,6 +443,16 @@ if __name__ == '__main__':
         if args.victim:
                 ransomwarelive.searchvictim(args.victim)
     
+    elif args.command =="recentvictims":
+        # defaults are group=all, count=10, since=the epoch as per argparse definition
+        try:
+            since_dt = datetime.strptime(args.since, "%Y-%m-%d %H:%M:%S")
+        except:
+            ransomwarelive.errlog("Unable to parse value of --since")
+
+        rv = ransomwarelive.recentvictims(group=args.group, count=args.count, since=since_dt)
+        print(json.dumps(rv, indent=2))
+
     elif args.command == "infostealer":
         if args.domain:
             asyncio.run(hudsonrock.run_query(args.domain))

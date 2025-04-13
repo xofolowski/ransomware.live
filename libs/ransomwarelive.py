@@ -19,6 +19,8 @@ from email.mime.image import MIMEImage
 from email.mime.base import MIMEBase
 from email import encoders
 
+import base64 
+
 # Appender 
 import html
 from gpt_query import GPTQuery
@@ -1051,6 +1053,81 @@ async def screenshotgangs():
                 except Exception as e:
                     errlog(f'Screenshot of {host["slug"]} has failled with error {e}')
                 stdlog(f'Finished screenshot{host["slug"]} for {group["name"]}')
+
+def recentvictims(count, group, since):
+    # debug logging
+    if group == "all":
+        group_desc = "all groups"
+    else:
+        group_desc = f"group {group}"
+    dbglog(f"Searching most recent {count} victims of {group_desc}")
+
+
+    with open(VICTIMS_FILE, 'r') as file:
+        data = json.load(file)
+        
+        # Ensure data is a list
+        if not isinstance(data, list):
+            data = [data]
+    
+    # filter for group if "group" is not "all"
+    if group != "all":
+        dbglog("Searching recent victims of group: " + group)
+        data = [entry for entry in data if entry['group_name'] == group]
+    
+    data = [entry for entry in data if datetime.strptime(entry['discovered'], "%Y-%m-%d %H:%M:%S.%f") > since]
+
+    recent_victims = sorted(
+        data,
+        key=lambda x: datetime.strptime(x['discovered'], "%Y-%m-%d %H:%M:%S.%f"),
+        reverse=True
+    )[:count]
+
+    total_matches = len(recent_victims)
+    dbglog(f"Found {total_matches} entries.")
+    
+    # constructing the result set
+    result = {
+        'total_matches': total_matches, 
+        'filter': {
+            'count': count, 
+            'group': group,
+            'since': datetime.strftime(since,"%Y-%m-%d %H:%M:%S")
+            },
+        'newest': "",
+        'oldest': "", 
+        'victims': []
+        }
+
+    for idx, post in enumerate(recent_victims, start=1):
+        if idx == 1:
+            result['newest'] = post['discovered']
+
+        if post.get('post_url',None) is not None:
+            hash_object = hashlib.md5()
+            # Update the hash object with the string
+            hash_object.update(post['post_url'].encode('utf-8'))
+            # Get the hexadecimal representation of the hash
+            hex_digest = hash_object.hexdigest()
+            if os.path.exists('docs/screenshots/posts/'+hex_digest+'.png'):
+                post['screenshot'] = hex_digest+'.png'
+                with open('docs/screenshots/posts/'+hex_digest+'.png', "rb") as f:
+                    post['screenshot_b64'] = base64.b64encode(f.read()).decode('utf-8')
+            else:
+                post['screenshot'] = ''
+
+        if is_fqdn(post.get('post_title')) and not post.get('website'):
+                post['website'] = post.get('post_title')
+
+        post['sorted_position'] = idx
+        post['infostealer'] = search_domain_for_infostealer(post['website'])
+
+        result['victims'].append(post)
+
+    result['oldest'] = post['discovered']
+    return result
+
+
 
 def searchvictim(name):
     with open(VICTIMS_FILE, 'r') as file:
