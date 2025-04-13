@@ -1,8 +1,13 @@
 import asyncio
+import atexit
+from genericpath import isfile
+import glob
 import hashlib
 import json
 import os
+from posixpath import basename
 import re
+import sys
 from playwright.async_api import async_playwright
 from dotenv import load_dotenv
 import logging 
@@ -19,6 +24,9 @@ from email.mime.image import MIMEImage
 from email.mime.base import MIMEBase
 from email import encoders
 
+import time
+import tempfile
+import importlib
 import base64 
 
 # Appender 
@@ -37,6 +45,10 @@ import tldextract
 
 # Import for update groups
 import pandas as pd
+
+# import API stuff
+from fastapi import FastAPI, Query, HTTPException
+from typing import Optional
 
 ## EXCEPTION 
 
@@ -88,6 +100,9 @@ elif LOG_LEVEL == "INFO":
 else:
     logger.setLevel(logging.ERROR)
 
+SCRAPE_INTERVAL = 1800
+app = FastAPI()
+
 ############################
 #
 # Internal functions  
@@ -124,6 +139,56 @@ def errlog(msg,pushover=False):
                 }), { "Content-type": "application/x-www-form-urlencoded" })
         conn.getresponse()
 
+def create_lock_file(LOCK_FILE):
+    """Create a lock file to prevent multiple instances."""
+    if os.path.exists(LOCK_FILE):
+        # Check the file's modification time
+        file_mtime = os.path.getmtime(LOCK_FILE)
+        current_time = time.time()
+        
+        # If the lock file is older than 3 hours (3 * 3600 seconds)
+        if current_time - file_mtime > 3 * 3600:
+            errlog("Lock file is older than 3 hours, removing it.", True)
+            remove_lock_file(LOCK_FILE)
+        else:
+            errlog("Program is already running.")
+            sys.exit(1)
+    
+    # Create the lock file
+    open(LOCK_FILE, 'w').close()
+    atexit.register(remove_lock_file, LOCK_FILE)
+
+def remove_lock_file(LOCK_FILE):
+    """Remove the lock file on program exit."""
+    if os.path.exists(LOCK_FILE):
+        os.remove(LOCK_FILE)
+
+def check_lock_file():
+    lock_file_path = '/tmp/ransomwarelive.lock'
+    if os.path.exists(lock_file_path):
+        creation_time = os.path.getctime(lock_file_path)
+        current_time = time.time()
+        elapsed_seconds = int(current_time - creation_time)
+        elapsed_minutes = elapsed_seconds // 60
+        creation_time_formatted = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(creation_time))
+        print(f"🟢 The \033[1mlock file\033[0m was created on: \033[1m{creation_time_formatted}\033[0m ({elapsed_minutes} minutes ago)")
+    else:
+        print("🔴 The \033[1mlock file\033[0m does not exist.")
+        file_path = "/var/log/ransomwarelive.log"
+        with open(file_path, "r") as file:
+            # Read all lines
+            lines = file.readlines()
+            # Get the last line
+            last_line = lines[-1]
+        fields = last_line.strip().split(',')
+        last_run = fields[0].replace(' ','\033[0m at \033[1m')
+        last_duration = int(fields[-1])
+
+        # Convert the last field from seconds to minutes
+        last_duration = last_duration / 60
+
+        # Print the extracted fields
+        print(f"Last full execution was on \033[1m{last_run}\033[0m during \033[1m{last_duration:.0f} minutes\033[0m")
 
 def is_fqdn(string):
     # Regular expression pattern to validate FQDN
@@ -829,6 +894,32 @@ def rename_original_image(input_path):
 #
 ###########################
  
+async def parse(group):
+    if group:
+        stdlog('Parser : '+ group)
+        module = importlib.import_module(f'parsers.{args.group}')
+        if os.path.isfile(f"./parsers/{args.group}-api.py"):
+            stdlog(f'A specific API call is available for {args.group}')
+            module = importlib.import_module(f'parsers.{args.group}-api')
+        module.main()
+    else:
+        LOCK_FILE_NAME = "parse.lock"
+        LOCK_FILE_PATH = os.path.join(tempfile.gettempdir(), LOCK_FILE_NAME)
+        create_lock_file(LOCK_FILE_PATH)  
+        start_time = time.time()
+        modules = sorted(glob.glob(join(dirname('parsers/'), "*.py")))
+        __all__ = [ basename(f)[:-3] for f in modules if isfile(f) and not f.endswith('__init__.py')]
+        counter = 0
+        num_modules = len(__all__)
+        for parser in __all__:
+            counter += 1
+            module = importlib.import_module(f'parsers.{parser}')
+            stdlog('Parser : [' + str(counter) + '/' + str(num_modules) + '] '+ parser)
+            module.main()
+        end_time = time.time()
+        execution_time = end_time - start_time
+        stdlog(f'Parsing execution time {execution_time:.2f} seconds')
+        remove_lock_file(LOCK_FILE_PATH)
 
 async def scrape(force=False):
     groups = openjson(GROUPS_FILE)
@@ -1302,3 +1393,33 @@ def ttps2json(input_directory, output_file):
 
     stdlog(f'JSON data has been written to {output_file}')
 
+# Fast API endpoints
+@app.get("/recentvictims")
+async def recent_victims_endpoint(
+    group: str = Query("all"), 
+    count: int = Query(10), 
+    since: str = Query("1970-01-01 00:00:00")
+):
+    try:
+        since_dt = datetime.strptime(since, "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        raise HTTPException(status_code=500, detail="Invalid 'since' timestamp format. Expected format: YYYY-MM-DD HH:MM:SS")
+    
+    return recentvictims(group=group, count=count, since=since_dt)
+
+@app.get("/search")
+async def search_endpoint(victim: Optional[str] = Query(None)):
+    return searchvictim(victim)
+
+# === Background Task to run scrape+parse every 1800 seconds ===
+async def periodic_scrape_parse():
+    while True:
+        stdlog("[task] Running scrape + parse sequence...")
+        await scrape()
+        await parse()
+        stdlog(f"[task] Sequence completed, sleeping for {SCRAPE_INTERVAL} seconds...")
+        await asyncio.sleep(SCRAPE_INTERVAL)
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(periodic_scrape_parse())
