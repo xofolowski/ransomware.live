@@ -7,7 +7,7 @@ services:
     volumes:
       - ./data/data:/ransomware.live/data
       - ./data/docs:/ransomware.live/docs
-      - ./data/sources:/ransomware.live/sources
+      - ./data/source:/ransomware.live/source
     ports:
       - "127.0.0.1:8080:8080"
 
