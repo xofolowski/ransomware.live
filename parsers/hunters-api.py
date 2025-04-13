@@ -106,7 +106,7 @@ def main():
             exfiltration = item['exfiltrated_data']
             encryption = item['encrypted_data']
             published = item.get('updated_at','')
-            description = "Country : " +  country + " - Exfiltraded data : " + convert_text(exfiltration) +  " - Encrypted data : " + convert_text(encryption)
+            description = "Country : " +  country + " - Exfiltrated data : " + convert_text(exfiltration) +  " - Encrypted data : " + convert_text(encryption)
             post_url = "https://hunters55rdxciehoqzwv7vgyv6nt37tbwax2reroyzxhou7my5ejyid.onion/companies/" + id 
            
             """
