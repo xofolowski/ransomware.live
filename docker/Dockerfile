@@ -20,7 +20,7 @@ WORKDIR /ransomware.live
 # Copy everything
 #COPY --exclude=.git --exclude=.github --exclude=.gitignore . .
 COPY . .
-RUN rm -rf .git .github .gitignore
+RUN rm -rf docker .git .github .gitignore
 
 # Install Python dependencies
 RUN pip install --upgrade pip

@@ -4,8 +4,10 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
     container_name: ransomware-live
-#    volumes:
-#      - ./data:/ransomware.live/data
+    volumes:
+      - ./data/data:/ransomware.live/data
+      - ./data/docs:/ransomware.live/docs
+      - ./data/sources:/ransomware.live/sources
     ports:
       - "127.0.0.1:8080:8080"
 
