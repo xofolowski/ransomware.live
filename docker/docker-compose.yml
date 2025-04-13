@@ -1,0 +1,12 @@
+services:
+  ransomware-live:
+    build: .
+    container_name: ransomware-live
+#    volumes:
+#      - ./data:/ransomware.live/data
+    ports:
+      - "127.0.0.1:8080:8080"
+
+  tor:
+    restart: always
+    image: dockage/tor-privoxy:latest
