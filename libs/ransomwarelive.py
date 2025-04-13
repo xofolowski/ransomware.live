@@ -1230,49 +1230,45 @@ def searchvictim(name):
         
         # Search logic
 
-        matching_posts = [
-            post for post in data if (
-                name.lower() in post.get('website', '').lower() or 
-                name.lower() in post.get('post_title', '').lower()
-            )
-        ]
-        
-        total_matches = len(matching_posts)
-        
-        # Print matching posts with counter
-        for idx, post in enumerate(matching_posts, start=1):
-            if post.get('post_url',None) is not None:
+    matching_posts = [
+        post for post in data if (
+            name.lower() in post.get('website', '').lower() or 
+            name.lower() in post.get('post_title', '').lower()
+        )
+    ]
+    
+    total_matches = len(matching_posts)
 
-                hash_object = hashlib.md5()
-                # Update the hash object with the string
-                hash_object.update(post['post_url'].encode('utf-8'))
-                # Get the hexadecimal representation of the hash
-                hex_digest = hash_object.hexdigest()
-                if os.path.exists('docs/screenshots/posts/'+hex_digest+'.png'):
-                    screenshot = "\033[1m Screenshot:\033[0m https://images.ransomware.live/screenshots/posts/" + hex_digest+'.png\n'
-                else:
-                    screenshot = ''
-            print(f"[{idx}/{total_matches}]")
-            print("\033[1m Post Title:\033[0m ", post.get('post_title', '\033[3mN/A\033[0m'))
-            print("\033[1m Group Name:\033[0m ", post.get('group_name', '\033[3mN/A\033[0m'))
-            print("\033[1m Discovered:\033[0m ", post.get('discovered', '\033[3mN/A\033[0m'))
-            print("\033[1m Description:\033[0m ", post.get('description', '\033[3mN/A\033[0m'))
-            if is_fqdn(post.get('post_title')):
-                print("\033[1m Domain:\033[0m ", post.get('post_title', '\033[3mN/A\033[0m'))
-                website = post.get('post_title')
-            elif post.get('website') and is_fqdn(post.get('website')):
-                print("\033[1m Domain:\033[0m ", post.get('website', '\033[3mN/A\033[0m'))
-                website = post.get('website')
+    # constructing the result set
+    result = {
+        'total_matches': total_matches, 
+        'victims': []
+        }
+    
+    # Print matching posts with counter
+    for idx, post in enumerate(matching_posts, start=1):
+        if post.get('post_url',None) is not None:
+            hash_object = hashlib.md5()
+            # Update the hash object with the string
+            hash_object.update(post['post_url'].encode('utf-8'))
+            # Get the hexadecimal representation of the hash
+            hex_digest = hash_object.hexdigest()
+            if os.path.exists('docs/screenshots/posts/'+hex_digest+'.png'):
+                post['screenshot'] = hex_digest+'.png'
+                with open('docs/screenshots/posts/'+hex_digest+'.png', "rb") as f:
+                    post['screenshot_b64'] = base64.b64encode(f.read()).decode('utf-8')
             else:
-                website = post.get('website')
-                print("\033[1m Website:\033[0m ", post.get('website', '\033[3mN/A\033[0m'))
-            print("\033[1m Published:\033[0m ", post.get('published', '\033[3mN/A\033[0m'))
-            print("\033[1m Post URL:\033[0m ", post.get('post_url', '\033[3mN/A\033[0m'))
-            print(screenshot,end=" ")
-            print("\033[1mCountry:\033[0m " +  post.get('country', '\033[3mN/A\033[0m'))
-            print("\033[1m Activity:\033[0m ", post.get('activity', '\033[3mN/A\033[0m'))
-            print("\033[1m Infostealer:\033[0m ", search_domain_for_infostealer(website))
-            print( "-"*50)
+                post['screenshot'] = ''
+
+        if is_fqdn(post.get('post_title')) and not post.get('website'):
+                post['website'] = post.get('post_title')
+
+        post['sorted_position'] = idx
+        post['infostealer'] = search_domain_for_infostealer(post['website'])
+
+        result['victims'].append(post)
+    return result
+        
 
 
 def siteadder(name, location):
