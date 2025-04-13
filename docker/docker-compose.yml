@@ -1,6 +1,8 @@
 services:
   ransomware-live:
-    build: .
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
     container_name: ransomware-live
 #    volumes:
 #      - ./data:/ransomware.live/data

@@ -18,7 +18,9 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /ransomware.live
 
 # Copy everything
-COPY ../* .
+#COPY --exclude=.git --exclude=.github --exclude=.gitignore . .
+COPY . .
+RUN rm -rf .git .github .gitignore
 
 # Install Python dependencies
 RUN pip install --upgrade pip
