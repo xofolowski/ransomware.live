@@ -901,7 +901,7 @@ async def parse(group):
         if os.path.isfile(f"./parsers/{args.group}-api.py"):
             stdlog(f'A specific API call is available for {args.group}')
             module = importlib.import_module(f'parsers.{args.group}-api')
-        module.main()
+        await module.main()
     else:
         LOCK_FILE_NAME = "parse.lock"
         LOCK_FILE_PATH = os.path.join(tempfile.gettempdir(), LOCK_FILE_NAME)
@@ -915,7 +915,7 @@ async def parse(group):
             counter += 1
             module = importlib.import_module(f'parsers.{parser}')
             stdlog('Parser : [' + str(counter) + '/' + str(num_modules) + '] '+ parser)
-            module.main()
+            await module.main()
         end_time = time.time()
         execution_time = end_time - start_time
         stdlog(f'Parsing execution time {execution_time:.2f} seconds')
