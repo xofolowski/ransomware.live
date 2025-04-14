@@ -1411,21 +1411,23 @@ async def search_endpoint(victim: Optional[str] = Query(None)):
 # === Background Task to run scrape+parse every 1800 seconds ===
 async def periodic_scrape_parse():
     while True:
-        stdlog("Running scrape + parse sequence...")
         try:
-            await scrape()
+            stdlog("Starting scraping background thread...")
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(None, scrape)  # run blocking scrape in a thread
+            stdlog("Scraping background thread finished.")
         except Exception as e:
             errlog(f"Error in scrape(): {e}")
 
         try:
-            await parse()
+            stdlog("Starting parsing background thread...")
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(None, parse)  # run blocking parse in a thread
+            stdlog("Parsing background thread finished.")
         except Exception as e:
             errlog(f"Error in parse(): {e}")
 
         stdlog(f"Sequence completed, sleeping for {SCRAPE_INTERVAL} seconds...")
-        
-        await scrape()
-        await parse()
         
         await asyncio.sleep(SCRAPE_INTERVAL)
 
