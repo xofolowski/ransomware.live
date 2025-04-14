@@ -5,7 +5,7 @@ import glob
 import hashlib
 import json
 import os
-from posixpath import basename
+from os.path import join, dirname, isfile, basename
 import re
 import sys
 from playwright.async_api import async_playwright

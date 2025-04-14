@@ -35,7 +35,6 @@ import argparse
 from dotenv import load_dotenv 
 import hashlib
 import time
-from os.path import join, dirname, isfile, basename
 from datetime import datetime 
 ## For lockfile
 import tempfile
