@@ -1413,15 +1413,17 @@ async def periodic_scrape_parse():
     while True:
         try:
             stdlog("Starting parsing background thread...")
-            loop = asyncio.get_running_loop()
-            await loop.run_in_executor(None, lambda:parse(None))  # run blocking parse in a thread
+#            loop = asyncio.get_running_loop()
+#            await loop.run_in_executor(None, lambda:parse(None))  # run blocking parse in a thread
+            await parse(group=None)
             stdlog("Parsing background thread finished.")
         except Exception as e:
             errlog(f"Error in parse(): {e}")
         try:
             stdlog("Starting scraping background thread...")
-            loop = asyncio.get_running_loop()
-            await loop.run_in_executor(None, lambda:scrape())  # run blocking scrape in a thread
+#            loop = asyncio.get_running_loop()
+#            await loop.run_in_executor(None, lambda:scrape())  # run blocking scrape in a thread
+            await scrape(force=False)
             stdlog("Scraping background thread finished.")
         except Exception as e:
             errlog(f"Error in scrape(): {e}")
