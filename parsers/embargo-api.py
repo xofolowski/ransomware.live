@@ -15,7 +15,9 @@ import requests
 import urllib3
 from dotenv import load_dotenv 
 env_path = os.path.join(os.path.dirname(__file__), '../.env')
-load_dotenv(dotenv_path=env_path)
+# load environment from .env file if it exists. If not, we have to rely on ENVIRONMENT being populated by other means, e.g. from docker
+if os.path.exists(env_path):
+    load_dotenv(dotenv_path=env_path)
 
 ## Import Ransomware.live libs 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'libs')))

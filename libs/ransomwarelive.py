@@ -72,7 +72,9 @@ CHROMIUM_PROXY_GROUPS = [
 # STMPmail : make a variable for to:  
 
 env_path = os.path.join(os.path.dirname(__file__), '../.env')
-load_dotenv(dotenv_path=env_path)
+# load environment from .env file if it exists. If not, we have to rely on ENVIRONMENT being populated by other means, e.g. from docker
+if os.path.exists(env_path):
+    load_dotenv(dotenv_path=env_path)
 
 WATERMARK_IMAGE_PATH = os.getenv('WATERMARK_IMAGE_PATH')
 POST_SCREENSHOT_DIR = os.getenv('POST_SCREENSHOT_DIR')
@@ -82,6 +84,10 @@ TOR_PROXY = {"server": os.getenv('TOR_PROXY_SERVER')}
 DATA_DIR = os.getenv('DATA_DIR')
 GROUPS_FILE = os.getenv('GROUPS_FILE')
 VICTIMS_FILE = os.getenv('VICTIMS_FILE')
+
+if not DATA_DIR:
+    print("ERROR: No configuration / ENV found!")
+    sys.exit()
 
 GPT = os.getenv('OPENAI_API_KEY')
 

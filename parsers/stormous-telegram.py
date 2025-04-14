@@ -10,8 +10,10 @@ from gpt_query import GPTQuery
 from ransomwarelive import dbglog, stdlog, errlog, extract_md5_from_filename, find_slug_by_md5, appender
 
 
-# Load environment variables from .env file in the same directory
-load_dotenv()
+env_path = os.path.join(os.path.dirname(__file__), '../.env')
+# load environment from .env file if it exists. If not, we have to rely on ENVIRONMENT being populated by other means, e.g. from docker
+if os.path.exists(env_path):
+    load_dotenv(dotenv_path=env_path)
 
 api_id = os.getenv('T_API_ID')
 api_hash = os.getenv('T_API_HASH')
