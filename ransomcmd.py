@@ -219,7 +219,7 @@ def main():
                 ransomwarelive.remove_lock_file(LOCK_FILE_PATH)
         
         elif args.command == 'parse':
-            asyncio.run(ransomwarelive.parse(args.group))
+            ransomwarelive.parse(args.group)
         
         elif args.command == 'generate':
             LOCK_FILE_NAME = "generate.lock"

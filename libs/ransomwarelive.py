@@ -895,13 +895,13 @@ def rename_original_image(input_path):
 #
 ###########################
  
-async def parse(group):
+def parse(group):
     if group:
         stdlog('Parser : '+ group)
-        module = importlib.import_module(f'parsers.{args.group}')
-        if os.path.isfile(f"./parsers/{args.group}-api.py"):
-            stdlog(f'A specific API call is available for {args.group}')
-            module = importlib.import_module(f'parsers.{args.group}-api')
+        module = importlib.import_module(f'parsers.{group}')
+        if os.path.isfile(f"./parsers/{group}-api.py"):
+            stdlog(f'A specific API call is available for {group}')
+            module = importlib.import_module(f'parsers.{group}-api')
         module.main()
     else:
         LOCK_FILE_NAME = "parse.lock"
@@ -1416,11 +1416,11 @@ async def periodic_scrape_parse(interval_seconds=1800):
     while True:
         try:
             stdlog("Running parse with timeout...")
-            """ await asyncio.wait_for(
+            await asyncio.wait_for(
                 loop.run_in_executor(None, lambda:parse(None)),  # parse is sync
                 timeout=10800  # timeout after 3 hours
-            ) """
-            await asyncio.wait_for(parse(None), timeout=10800)
+            )
+            # await asyncio.wait_for(parse(None), timeout=10800)
 
             stdlog("Running scrape with timeout...")
             await asyncio.wait_for(scrape(), timeout=10800)  # timeout after 3 hours (scrape is async)
