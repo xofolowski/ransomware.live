@@ -1412,20 +1412,19 @@ async def search_endpoint(victim: Optional[str] = Query(None)):
 async def periodic_scrape_parse():
     while True:
         try:
-            stdlog("Starting scraping background thread...")
-            loop = asyncio.get_running_loop()
-            await loop.run_in_executor(None, scrape)  # run blocking scrape in a thread
-            stdlog("Scraping background thread finished.")
-        except Exception as e:
-            errlog(f"Error in scrape(): {e}")
-
-        try:
             stdlog("Starting parsing background thread...")
             loop = asyncio.get_running_loop()
-            await loop.run_in_executor(None, parse)  # run blocking parse in a thread
+            await loop.run_in_executor(None, lambda:parse(None))  # run blocking parse in a thread
             stdlog("Parsing background thread finished.")
         except Exception as e:
             errlog(f"Error in parse(): {e}")
+        try:
+            stdlog("Starting scraping background thread...")
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(None, lambda:scrape())  # run blocking scrape in a thread
+            stdlog("Scraping background thread finished.")
+        except Exception as e:
+            errlog(f"Error in scrape(): {e}")
 
         stdlog(f"Sequence completed, sleeping for {SCRAPE_INTERVAL} seconds...")
         
