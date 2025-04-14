@@ -1412,12 +1412,9 @@ async def recent_victims_endpoint(
     except ValueError:
         raise HTTPException(status_code=500, detail="Invalid 'since' timestamp format. Expected format: YYYY-MM-DD HH:MM:SS")
     
-    if sshot == "true":
-        s = True
-    else:
-        s = False
+    sshot = sshot.lower in ['true', 'yes', 'y', '1']
 
-    return recentvictims(group=group, count=count, since=since_dt, sshot=s)
+    return recentvictims(group=group, count=count, since=since_dt, sshot=sshot)
 
 @app.get("/search")
 async def search_endpoint(victim: Optional[str] = Query(None)):
