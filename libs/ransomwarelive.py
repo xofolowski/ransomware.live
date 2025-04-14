@@ -49,6 +49,7 @@ import pandas as pd
 # import API stuff
 from fastapi import FastAPI, Query, HTTPException
 from typing import Optional
+import traceback
 
 ## EXCEPTION 
 
@@ -901,7 +902,7 @@ async def parse(group):
         if os.path.isfile(f"./parsers/{args.group}-api.py"):
             stdlog(f'A specific API call is available for {args.group}')
             module = importlib.import_module(f'parsers.{args.group}-api')
-        await module.main()
+        module.main()
     else:
         LOCK_FILE_NAME = "parse.lock"
         LOCK_FILE_PATH = os.path.join(tempfile.gettempdir(), LOCK_FILE_NAME)
@@ -915,7 +916,7 @@ async def parse(group):
             counter += 1
             module = importlib.import_module(f'parsers.{parser}')
             stdlog('Parser : [' + str(counter) + '/' + str(num_modules) + '] '+ parser)
-            await module.main()
+            module.main()
         end_time = time.time()
         execution_time = end_time - start_time
         stdlog(f'Parsing execution time {execution_time:.2f} seconds')
@@ -1409,29 +1410,36 @@ async def search_endpoint(victim: Optional[str] = Query(None)):
     return searchvictim(victim)
 
 # === Background Task to run scrape+parse every 1800 seconds ===
-async def periodic_scrape_parse():
+async def periodic_scrape_parse(interval_seconds=1800):
+    loop = asyncio.get_running_loop()
+
     while True:
         try:
-            stdlog("Starting parsing background thread...")
-#            loop = asyncio.get_running_loop()
-#            await loop.run_in_executor(None, lambda:parse(None))  # run blocking parse in a thread
-            await parse(group=None)
-            stdlog("Parsing background thread finished.")
-        except Exception as e:
-            errlog(f"Error in parse(): {e}")
-        try:
-            stdlog("Starting scraping background thread...")
-#            loop = asyncio.get_running_loop()
-#            await loop.run_in_executor(None, lambda:scrape())  # run blocking scrape in a thread
-            await scrape(force=False)
-            stdlog("Scraping background thread finished.")
-        except Exception as e:
-            errlog(f"Error in scrape(): {e}")
+            stdlog("Running parse with timeout...")
+            """ await asyncio.wait_for(
+                loop.run_in_executor(None, lambda:parse(None)),  # parse is sync
+                timeout=10800  # timeout after 3 hours
+            ) """
+            await asyncio.wait_for(parse(None), timeout=10800)
 
-        stdlog(f"Sequence completed, sleeping for {SCRAPE_INTERVAL} seconds...")
-        
-        await asyncio.sleep(SCRAPE_INTERVAL)
+            stdlog("Running scrape with timeout...")
+            await asyncio.wait_for(scrape(), timeout=10800)  # timeout after 3 hours (scrape is async)
 
+            stdlog(f"Scrape / parse sequence completed successfully, sleeping for {interval_seconds} seconds...")
+            await asyncio.sleep(interval_seconds)
+
+        except asyncio.TimeoutError as e:
+            errlog(f"Timeout error: {e}")
+            traceback.print_exc()
+
+        except Exception as e:
+            errlog(f"Unexpected error: {e}")
+            traceback.print_exc()
+
+        stdlog("Sleeping 60 seconds before retrying due to error...")
+        await asyncio.sleep(60)  # sleep 1 min after error before retrying
+
+# Start background task when FastAPI boots up
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(periodic_scrape_parse())
