@@ -920,6 +920,7 @@ async def parse(group):
         execution_time = end_time - start_time
         stdlog(f'Parsing execution time {execution_time:.2f} seconds')
         remove_lock_file(LOCK_FILE_PATH)
+    return
 
 async def scrape(force=False):
     groups = openjson(GROUPS_FILE)
@@ -971,7 +972,7 @@ async def scrape(force=False):
                 with open(GROUPS_FILE, 'w', encoding='utf-8') as groupsfile:
                     json.dump(groups, groupsfile, ensure_ascii=False, indent=4)
                 stdlog(f'Group {group["name"]} metadata updated')
-
+    return
 
 async def scrapegang(groupname,force=False):
     groups = openjson(GROUPS_FILE)
@@ -1410,10 +1411,22 @@ async def search_endpoint(victim: Optional[str] = Query(None)):
 # === Background Task to run scrape+parse every 1800 seconds ===
 async def periodic_scrape_parse():
     while True:
-        stdlog("[task] Running scrape + parse sequence...")
+        stdlog("Running scrape + parse sequence...")
+        try:
+            await scrape()
+        except Exception as e:
+            errlog(f"Error in scrape(): {e}")
+
+        try:
+            await parse()
+        except Exception as e:
+            errlog(f"Error in parse(): {e}")
+
+        stdlog(f"Sequence completed, sleeping for {SCRAPE_INTERVAL} seconds...")
+        
         await scrape()
         await parse()
-        stdlog(f"[task] Sequence completed, sleeping for {SCRAPE_INTERVAL} seconds...")
+        
         await asyncio.sleep(SCRAPE_INTERVAL)
 
 @app.on_event("startup")
