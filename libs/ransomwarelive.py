@@ -118,7 +118,7 @@ app = FastAPI()
 
 logging.basicConfig(
     format='%(asctime)s,%(msecs)d %(levelname)-8s %(message)s',
-    datefmt='%Y-%m-%d:%H:%M:%S',
+    datefmt='%Y-%m-%d %H:%M:%S',
     level=logging.DEBUG
     )
 
@@ -1153,7 +1153,7 @@ async def screenshotgangs():
                     errlog(f'Screenshot of {host["slug"]} has failled with error {e}')
                 stdlog(f'Finished screenshot{host["slug"]} for {group["name"]}')
 
-def recentvictims(count, group, since):
+def recentvictims(count, group, since, sshot):
     # debug logging
     if group == "all":
         group_desc = "all groups"
@@ -1210,8 +1210,9 @@ def recentvictims(count, group, since):
             hex_digest = hash_object.hexdigest()
             if os.path.exists('docs/screenshots/posts/'+hex_digest+'.png'):
                 post['screenshot'] = hex_digest+'.png'
-                with open('docs/screenshots/posts/'+hex_digest+'.png', "rb") as f:
-                    post['screenshot_b64'] = base64.b64encode(f.read()).decode('utf-8')
+                if sshot:
+                    with open('docs/screenshots/posts/'+hex_digest+'.png', "rb") as f:
+                        post['screenshot_b64'] = base64.b64encode(f.read()).decode('utf-8')
             else:
                 post['screenshot'] = ''
 
@@ -1223,7 +1224,8 @@ def recentvictims(count, group, since):
 
         result['victims'].append(post)
 
-    result['oldest'] = post['discovered']
+    if len(result['victims']) > 0:
+        result['oldest'] = post['discovered']
     return result
 
 
@@ -1402,14 +1404,20 @@ def ttps2json(input_directory, output_file):
 async def recent_victims_endpoint(
     group: str = Query("all"), 
     count: int = Query(10), 
-    since: str = Query("1970-01-01 00:00:00")
+    since: str = Query("1970-01-01 00:00:00"),
+    sshot: str = Query("false")
 ):
     try:
         since_dt = datetime.strptime(since, "%Y-%m-%d %H:%M:%S")
     except ValueError:
         raise HTTPException(status_code=500, detail="Invalid 'since' timestamp format. Expected format: YYYY-MM-DD HH:MM:SS")
     
-    return recentvictims(group=group, count=count, since=since_dt)
+    if sshot == "true":
+        s = True
+    else:
+        s = False
+
+    return recentvictims(group=group, count=count, since=since_dt, sshot=s)
 
 @app.get("/search")
 async def search_endpoint(victim: Optional[str] = Query(None)):

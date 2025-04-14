@@ -150,6 +150,7 @@ def main():
     parser_recentvictims.add_argument('-g', '--group', type=str, default="all", help='Specify a group name')
     parser_recentvictims.add_argument('-c', '--count', type=int, default=10, help='Number of victims to return')
     parser_recentvictims.add_argument('-s', '--since', type=str, default="1970-01-01 00:00:00", help="Only include entries discovered after this timestamp (format: YYYY-MM-DD HH:MM:SS)")
+    parser_recentvictims.add_argument('-S', '--sshot', action='store_true', help='Include base64 encoded screenshots in output')
     
     parser_rss = subparsers.add_parser('rss', help='Generate RSS feeds')
 
@@ -410,8 +411,8 @@ def main():
                 since_dt = datetime.strptime(args.since, "%Y-%m-%d %H:%M:%S")
             except:
                 ransomwarelive.errlog("Unable to parse value of --since")
-
-            rv = ransomwarelive.recentvictims(group=args.group, count=args.count, since=since_dt)
+            
+            rv = ransomwarelive.recentvictims(group=args.group, count=args.count, since=since_dt, sshot=args.sshot)
             print(json.dumps(rv, indent=2))
 
         elif args.command == "infostealer":
