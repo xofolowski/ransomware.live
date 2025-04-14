@@ -20,7 +20,7 @@ import xml.etree.ElementTree as ET
 import requests
 from io import StringIO
 
-TOR_PROXY_SERVER=os.getenv('TOR_PROXY_SERVER')
+TOR_PROXY_SERVER='socks5h://' + os.getenv('TOR_PROXY_SERVER')
 
 
 # Set up Tor SOCKS proxy

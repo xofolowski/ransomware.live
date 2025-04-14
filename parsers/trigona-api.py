@@ -19,7 +19,7 @@ import requests
 import socks
 import json
 
-TOR_PROXY_SERVER=os.getenv('TOR_PROXY_SERVER')
+TOR_PROXY_SERVER='socks5h://' + os.getenv('TOR_PROXY_SERVER')
 
 # Assuming Tor is running on default port 9050.
 proxies = {

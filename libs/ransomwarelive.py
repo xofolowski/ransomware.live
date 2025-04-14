@@ -79,7 +79,7 @@ if os.path.exists(env_path):
 WATERMARK_IMAGE_PATH = os.getenv('WATERMARK_IMAGE_PATH')
 POST_SCREENSHOT_DIR = os.getenv('POST_SCREENSHOT_DIR')
 SCREENSHOT_DIR = os.getenv('SCREENSHOT_DIR')
-TOR_PROXY = {"server": os.getenv('TOR_PROXY_SERVER')}
+TOR_PROXY = {"server": "socks5://" + os.getenv('TOR_PROXY_SERVER')} # this is only used for playwright browsers, where socks5h:// is not an appropriate scheme
 #FF_PROXY_GROUPS = os.getenv('FF_PROXY_GROUPS').split(',')
 DATA_DIR = os.getenv('DATA_DIR')
 GROUPS_FILE = os.getenv('GROUPS_FILE')
