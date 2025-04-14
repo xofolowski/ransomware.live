@@ -1168,11 +1168,11 @@ def recentvictims(count, group, since):
         dbglog("Searching recent victims of group: " + group)
         data = [entry for entry in data if entry['group_name'] == group]
     
-    data = [entry for entry in data if datetime.strptime(entry['discovered'], "%Y-%m-%d %H:%M:%S.%f") > since]
+    data = [entry for entry in data if datetime.strptime(entry['published'], "%Y-%m-%d %H:%M:%S.%f") > since]
 
     recent_victims = sorted(
         data,
-        key=lambda x: datetime.strptime(x['discovered'], "%Y-%m-%d %H:%M:%S.%f"),
+        key=lambda x: datetime.strptime(x['published'], "%Y-%m-%d %H:%M:%S.%f"),
         reverse=True
     )[:count]
 
